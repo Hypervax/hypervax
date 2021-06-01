@@ -33,5 +33,21 @@ jobs:
       with:
         distribution: goreleaser
         version: latest
-        workdir: ./cmd 
+        workdir: ./cmd/lambda
         install-only: false
+
+    - name: Build binary
+        run: |
+          cd cmd/lambda && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -a -o main main.go && zip deployment.zip main
+
+    # dry run
+    - name: AWS Lambda Deploy
+      uses: appleboy/lambda-action@master
+      with:
+        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws_region: ${{ secrets.AWS_REGION }}
+        function_name: gorush
+        zip_file: output.zip
+        dry_run: true
+ 
