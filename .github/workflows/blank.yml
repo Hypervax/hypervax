@@ -25,17 +25,6 @@ jobs:
     - name: Test
       run: go test -v ./...
 
-    - name: GoReleaser Action
-      # You may pin to the exact commit or the version.
-      # uses: goreleaser/goreleaser-action@ac067437f516133269923265894e77920c3dce18
-      uses: goreleaser/goreleaser-action@v2.6.1
-      with:
-        distribution: goreleaser
-        version: latest
-        args:
-        workdir: ./cmd/lambda
-        install-only: false
-
     - name: Build binary
       run: |
         cd cmd/lambda && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -a -o main main.go && zip deployment.zip main
@@ -47,7 +36,10 @@ jobs:
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws_region: ${{ secrets.AWS_REGION }}
-        function_name: gorush
-        zip_file: output.zip
+        function_name: gorush 
+        zip_file: deployment.zip
         dry_run: true
- 
+        memory_size: 128
+        timeout: 10
+        handler: HandleRequest
+        role: arn:aws:iam::xxxxxxxxxxx:role/test1234
